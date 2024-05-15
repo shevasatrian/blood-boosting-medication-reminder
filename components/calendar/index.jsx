@@ -91,18 +91,18 @@ export default function Calendar() {
   }
 
   return (
-    <div className="pt-16">
+    <div className="pt-4">
       
-      <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6">
-        <div className="md:grid md:grid-cols-2 md:divide-x md:divide-gray-200">
+      {/* <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6"> */}
+        <div className="md:grid md:grid-cols-1 md:divide-x md:divide-gray-200">
           <div className="md:pr-14">
             <div className="flex items-center">
               <h2 className="flex-auto font-semibold text-gray-900">
               <div>
                 {/* Tombol untuk menambahkan event dengan pesan default */}
                 {/* onClick={() => addDefaultEvent(selectedDay)} */}
-                <button onClick={() => { addDefaultEvent(selectedDay);}} className="border rounded-lg p-2">
-                  Tambah Event pada {format(selectedDay, 'dd MMMM yyyy')}
+                <button onClick={() => { addDefaultEvent(selectedDay);}} className="border rounded-lg px-2 py-1 bg-sky-200 border-sky-300 hover:opacity-90">
+                  Tandai tanggal {format(selectedDay, 'dd MMMM yyyy')}
                 </button>
                 {/* {eventAdded && <p>Event sudah ditambahkan untuk tanggal ini.</p>} */}
               </div>
@@ -185,7 +185,7 @@ export default function Calendar() {
               ))}
             </div>
           </div>
-          <section className="mt-12 md:mt-0 md:pl-14">
+          {/* <section className="mt-12 md:mt-0 md:pl-14">
             <h2 className="font-semibold text-gray-900">
               Schedule for{' '}
               <time dateTime={format(selectedDay, 'yyyy-MM-dd')}>
@@ -201,9 +201,9 @@ export default function Calendar() {
                 <p>No meetings for today.</p>
               )}
             </ol>
-          </section>
+          </section> */}
         </div>
-      </div>
+      {/* </div> */}
     </div>
   )
 }
