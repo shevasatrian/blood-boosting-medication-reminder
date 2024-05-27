@@ -1,57 +1,93 @@
 /* eslint-disable react/button-has-type */
 /* eslint-disable jsx-a11y/label-has-associated-control */
-// import {
-//     Flex, Stack, Heading, FormControl, Input, Button, useToast
-//   } from "@chakra-ui/react";
+  import {useToast} from "@chakra-ui/react";
   import { useState } from "react";
-//   import Cookies from "js-cookie";
+  import Cookies from "js-cookie";
   import { useRouter } from "next/router";
   import Link from "next/link";
   import Image from "next/image";
-//   import { useMutation } from "@/hooks/useMutation";
+  import { useMutation } from "../hooks/useMutation";
   
   export default function Register() {
     const router = useRouter();
-    // const toast = useToast();
-    // const { mutate } = useMutation();
+    const toast = useToast();
+    const { mutate } = useMutation();
     const [payload, setPayload] = useState({
       name: "",
       email: "",
       password: "",
-      phone: "",
-      hobby: "",
-      dob: "",
+      birthdate: "",
     });
   
     const [showPassword, setShowPassword] = useState(false);
+
+    const validateEmail = (email) => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return regex.test(email);
+    };
   
-    // const HandleSubmit = async () => {
-    //   const response = await mutate({
-    //     url: "https://paace-f178cafcae7b.nevacloud.io/api/register",
-    //     payload,
-    //   });
-    //   // console.log('response => ', response)
-    //   if (!response?.success) {
-    //     toast({
-    //       title: "Register Failed",
-    //       description: "Please repeat the registration",
-    //       status: "error",
-    //       duration: 2000,
-    //       isClosable: true,
-    //       position: "top",
-    //     });
-    //   } else {
-    //     toast({
-    //       title: "Register Success",
-    //       description: "Please Login",
-    //       status: "success",
-    //       duration: 2000,
-    //       isClosable: true,
-    //       position: "top",
-    //     });
-    //     router.push("/login");
-    //   }
-    // };
+    const HandleSubmit = async () => {
+      const { name, email, password, birthdate } = payload;
+
+      if (!name || !email || !password || !birthdate) {
+        toast({
+          title: "All fields are required",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+
+      if (!validateEmail(email)) {
+        toast({
+          title: "Invalid email format",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+
+      if (password.length < 6) {
+        toast({
+          title: "Password must be at least 6 characters",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+        return;
+      }
+
+      const response = await mutate({
+        url: "https://blood-sup.fly.dev/signup",
+        payload,
+      });
+      console.log('response => ', response)
+      if (!response?.user) {
+        toast({
+          title: "Register Failed",
+          description: "Please repeat the registration",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+      } else {
+        toast({
+          title: "Register Success",
+          description: "Please Login",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+        router.push("/login");
+      }
+    };
   
     return (
       <div className="flex items-center justify-center h-screen bg-gray-200">
@@ -97,13 +133,14 @@
             </button>
           </div>
           <div className="mb-4">
-            <label htmlFor="dob">Date of Birthday</label>
+            <label htmlFor="birthdate">Date of Birthday</label>
             <input
               className="border w-full p-2 rounded-2xl focus:outline-none focus:border-blue-500"
-              value={payload?.dob}
-              onChange={(event) => setPayload({ ...payload, dob: event.target.value })}
-              id="dob"
+              value={payload?.birthdate}
+              onChange={(event) => setPayload({ ...payload, birthdate: event.target.value })}
+              id="birthdate"
               type="date"
+              required
             />
           </div>
           <div>

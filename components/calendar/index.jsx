@@ -16,14 +16,23 @@ import {
   startOfToday,
 } from 'date-fns'
 import { Fragment, useState, useEffect } from 'react'
+import { useQueries } from '../../hooks/useQueries'
+import { useMutation } from '../../hooks/useMutation'
+import Cookies from "js-cookie";
+import { useToast } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import Modal from 'react-modal';
 
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
-export default function Calendar() {
-    
+export default function Calendar({ onConsumptionsUpdate }) {
+  
+  const { mutate } = useMutation();
+  const router = useRouter();
+
   let today = startOfToday()
   let [selectedDay, setSelectedDay] = useState(today)
   let [currentMonth, setCurrentMonth] = useState(format(today, 'MMM-yyyy'))
@@ -31,11 +40,44 @@ export default function Calendar() {
   let firstDayCurrentMonth = parse(currentMonth, 'MMM-yyyy', new Date())
   const [eventAddedMap, setEventAddedMap] = useState({});
   const [lastId, setLastId] = useState(0);
+  const [monthlyCount, setMonthlyCount] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false);  // State untuk modal
+  const [dayToCancel, setDayToCancel] = useState(null);
+
+  const toast = useToast();
 
   let days = eachDayOfInterval({
     start: firstDayCurrentMonth,
     end: endOfMonth(firstDayCurrentMonth),
   })
+
+  useEffect(() => {
+    fetchData();
+  }, [currentMonth]);
+
+  const fetchData = async () => {
+    const year = format(firstDayCurrentMonth, 'yyyy');
+    const month = format(firstDayCurrentMonth, 'MM');
+    const response = await fetch(`https://blood-sup.fly.dev/getdrugconsumption?month=${month}&year=${year}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${Cookies.get("user_token")}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+
+    const updatedEventAddedMap = {};
+    data.consumptions.forEach((event) => {
+      const dateKey = format(parseISO(event.consume_at), 'yyyy-MM-dd');
+      updatedEventAddedMap[dateKey] = event.ID;
+    });
+    setEventAddedMap(updatedEventAddedMap);
+    setMonthlyCount(data.consumptions.length)
+    if (onConsumptionsUpdate) {
+      onConsumptionsUpdate(data.consumptions.length);
+    }
+  };
 
   function previousMonth() {
     let firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 })
@@ -51,49 +93,156 @@ export default function Calendar() {
     isSameDay(parseISO(meeting.startDatetime), selectedDay)
   )
 
-  function addDefaultEvent(selectedDay) {
-    console.log("addDefaultEvent called");
+  async function addDefaultEvent(selectedDay) {
     const selectedDateKey = format(selectedDay, 'yyyy-MM-dd');
-    if (!eventAddedMap[selectedDateKey]) { // hanya tambahkan event jika belum ditambahkan sebelumnya
-      const defaultMeeting = {
-        id: lastId,
-        image: "drug.png",
-        name: "Jadwal minum obat tambah darah",
-        startDatetime: selectedDay.toISOString(), // Menggunakan waktu mulai pada pukul 00:00:00 pada tanggal yang dipilih
-        endDatetime: selectedDay.toISOString(), // Menggunakan waktu selesai pada pukul 00:00:00 pada tanggal yang dipilih
-      };
-      setMeetings([...meetings, defaultMeeting]);
-      console.log("Meetings after setMeetings:", meetings);
-  
-      // Update status penambahan acara untuk tanggal yang dipilih
-      setEventAddedMap(prevState => ({
-        ...prevState,
-        [selectedDateKey]: true,
-      }));
-      
-      // Update lastId
-      setLastId(lastId + 1);
+    if (eventAddedMap[selectedDateKey]) {
+      console.log("Date already marked.");
+      toast({
+        title: "Gagal Menandai",
+        description: "Tanggal tersebut sudah ditandai",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+    if (monthlyCount >= 10) {
+      console.log("Maximum of 10 events per month reached.");
+      toast({
+        title: "Gagal Menandai",
+        description: "Sudah mencapai jumlah maksimum bulanan",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+      return;
+    }
+
+    toast({
+      title: "Tanggal berhasil ditandai",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+      position: "top",
+    });
+
+    await setEventAddedMap(prevState => ({
+      ...prevState,
+      [selectedDateKey]: lastId,
+    }));
+
+    setLastId(lastId + 1);
+    setMonthlyCount(monthlyCount + 1);
+    if (onConsumptionsUpdate) {
+      onConsumptionsUpdate(monthlyCount + 1);
+    }
+    
+
+    const newPayload = {
+      consume_at: selectedDay.toISOString(),
+      IsEmailSended: false,
+    };
+
+    try {
+      const response = await mutate({
+        url: 'https://blood-sup.fly.dev/drugconsumption',
+        payload: newPayload,
+        headers: {
+          Authorization: `Bearer ${Cookies.get("user_token")}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (response && response.ID) {
+        setEventAddedMap(prevState => ({
+          ...prevState,
+          [selectedDateKey]: response.ID, // Update the ID with the response ID
+        }));
+      }
+      router.reload();
+      console.log("Response:", response);
+    } catch (error) {
+      console.error("Error:", error);
     }
   }
-  
-  function cancelMeeting(meetingId) {
-    const selectedDateKey = format(selectedDay, 'yyyy-MM-dd');
-    // Filter daftar pertemuan untuk hanya menyertakan pertemuan yang tidak terjadi pada tanggal yang dipilih
-    const updatedMeetings = meetings.filter(
-      (meeting) => meeting.id !== meetingId || !isSameDay(parseISO(meeting.startDatetime), selectedDay)
-    );
-    // Setel kembali daftar pertemuan dengan daftar yang sudah difilter
-    setMeetings(updatedMeetings);
-    setEventAddedMap(prevState => ({
-      ...prevState,
-      [selectedDateKey]: false
-    }));
+
+  async function handleCancel(selectedDay) {
+    if (!dayToCancel) return;
+    const selectedDateKey = format(dayToCancel, 'yyyy-MM-dd');
+    const eventId = eventAddedMap[selectedDateKey];
+
+    if (!eventId) {
+      console.log("No event to cancel for this date.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://blood-sup.fly.dev/deleteconsumption/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${Cookies.get("user_token")}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Tanggal berhasil dibatalkan",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+
+        setMeetings(meetings.filter(meeting => meeting.id !== eventId));
+        setEventAddedMap(prevState => {
+          const newState = { ...prevState };
+          delete newState[selectedDateKey];
+          return newState;
+        });
+        setMonthlyCount(monthlyCount - 1);
+        if (onConsumptionsUpdate) {
+          onConsumptionsUpdate(monthlyCount - 1);
+        }
+      } else {
+        console.error("Failed to delete the event. Status:", response.status);
+        toast({
+          title: "Gagal Membatalkan",
+          description: "Terjadi kesalahan saat membatalkan tanggal",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
+      }
+      router.reload();
+    } catch (error) {
+      console.error("Error:", error);
+      toast({
+        title: "Gagal Membatalkan",
+        description: "Terjadi kesalahan saat membatalkan tanggal",
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+    setIsModalOpen(false);
+  }
+
+  function openModal(day) {
+    setDayToCancel(day);
+    setIsModalOpen(true);
+  }
+
+  function closeModal() {
+    setDayToCancel(null);
+    setIsModalOpen(false);
   }
 
   return (
     <div className="pt-4">
-      
-      {/* <div className="max-w-md px-4 mx-auto sm:px-7 md:max-w-4xl md:px-6"> */}
         <div className="md:grid md:grid-cols-1 md:divide-x md:divide-gray-200">
           <div className="md:pr-14">
             <div className="flex items-center">
@@ -105,6 +254,11 @@ export default function Calendar() {
                   Tandai tanggal {format(selectedDay, 'dd MMMM yyyy')}
                 </button>
                 {/* {eventAdded && <p>Event sudah ditambahkan untuk tanggal ini.</p>} */}
+                {eventAddedMap[format(selectedDay, 'yyyy-MM-dd')] !== undefined && (
+                <button onClick={() => { openModal(selectedDay); }} className="ml-2 border rounded-lg px-2 py-1 bg-red-200 border-red-300 hover:opacity-90">
+                  Cancel
+                </button>
+                )}
               </div>
                 {format(firstDayCurrentMonth, 'MMMM yyyy')}
               </h2>
@@ -145,7 +299,7 @@ export default function Calendar() {
                 >
                   <button
                     type="button"
-                    onClick={() => setSelectedDay(day)}
+                    onClick={() => isToday(day) && setSelectedDay(day)}
                     className={classNames(
                       isEqual(day, selectedDay) && 'text-white',
                       !isEqual(day, selectedDay) &&
@@ -166,7 +320,7 @@ export default function Calendar() {
                       !isEqual(day, selectedDay) && 'hover:bg-gray-200',
                       (isEqual(day, selectedDay) || isToday(day)) &&
                         'font-semibold',
-                      'mx-auto flex h-8 w-8 items-center justify-center rounded-full'
+                      'mx-auto flex h-8 w-8 items-center justify-center rounded-full',
                     )}
                   >
                     <time dateTime={format(day, 'yyyy-MM-dd')}>
@@ -175,115 +329,39 @@ export default function Calendar() {
                   </button>
 
                   <div className="w-1 h-1 mx-auto mt-1">
-                    {meetings.some((meeting) =>
-                      isSameDay(parseISO(meeting.startDatetime), day)
-                    ) && (
-                      <div className="w-1 h-1 rounded-full bg-sky-500"></div>
-                    )}
+                  {eventAddedMap[format(day, 'yyyy-MM-dd')] !== undefined && (
+                    <div className="w-1 h-1 rounded-full bg-sky-500"></div>
+                  )}
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          {/* <section className="mt-12 md:mt-0 md:pl-14">
-            <h2 className="font-semibold text-gray-900">
-              Schedule for{' '}
-              <time dateTime={format(selectedDay, 'yyyy-MM-dd')}>
-                {format(selectedDay, 'MMM dd, yyy')}
-              </time>
-            </h2>
-            <ol className="mt-4 space-y-1 text-sm leading-6 text-gray-500">
-              {selectedDayMeetings.length > 0 ? (
-                selectedDayMeetings.map((meeting) => (
-                  <Meeting meeting={meeting} cancelMeeting={cancelMeeting} key={meeting.id} />
-                ))
-              ) : (
-                <p>No meetings for today.</p>
-              )}
-            </ol>
-          </section> */}
-        </div>
-      {/* </div> */}
-    </div>
-  )
-}
-
-function Meeting({ meeting, cancelMeeting }) {
-  let startDateTime = parseISO(meeting.startDatetime)
-  let endDateTime = parseISO(meeting.endDatetime)
-
-  return (
-    <li className="flex items-center px-4 py-2 space-x-4 group rounded-xl focus-within:bg-gray-100 hover:bg-gray-100">
-      <img
-        src={meeting.image}
-        alt="drug"
-        className="flex-none w-10 h-10 rounded-full"
-      />
-      <div className="flex-auto">
-        <p className="text-gray-900">{meeting.name}</p>
-        <p className="mt-0.5">
-          <time dateTime={meeting.startDatetime}>
-            {format(startDateTime, 'h:mm a')}
-          </time>{' '}
-          -{' '}
-          <time dateTime={meeting.endDatetime}>
-            {format(endDateTime, 'h:mm a')}
-          </time>
-        </p>
-      </div>
-      <Menu
-        as="div"
-        className="relative opacity-0 focus-within:opacity-100 group-hover:opacity-100"
-      >
-        <div>
-          <Menu.Button className="-m-2 flex items-center rounded-full p-1.5 text-gray-500 hover:text-gray-600">
-            <span className="sr-only">Open options</span>
-            <DotsVerticalIcon className="w-6 h-6" aria-hidden="true" />
-          </Menu.Button>
         </div>
 
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="transform opacity-0 scale-95"
-          enterTo="transform opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="transform opacity-100 scale-100"
-          leaveTo="transform opacity-0 scale-95"
-        >
-          <Menu.Items className="absolute right-0 z-10 mt-2 origin-top-right bg-white rounded-md shadow-lg w-36 ring-1 ring-black ring-opacity-5 focus:outline-none">
-            <div className="py-1">
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    href="#"
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Edit
-                  </a>
-                )}
-              </Menu.Item>
-              <Menu.Item>
-                {({ active }) => (
-                  <a
-                    onClick={() => cancelMeeting(meeting.id)}
-                    className={classNames(
-                      active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                      'block px-4 py-2 text-sm'
-                    )}
-                  >
-                    Cancel
-                  </a>
-                )}
-              </Menu.Item>
+        <Modal
+          isOpen={isModalOpen}
+          onRequestClose={closeModal}
+          contentLabel="Confirmation Modal"
+          className="fixed inset-0 z-10 flex items-center justify-center p-4 bg-gray-500 bg-opacity-75"
+          overlayClassName="fixed inset-0">
+          <div className="bg-white rounded-lg shadow-xl sm:max-w-lg sm:w-full p-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 text-center">Are you sure you want to cancel?</h3>
+            <div className="mt-4 flex justify-center">
+              <button
+                onClick={handleCancel}
+                className="mr-4 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
+                Yes
+              </button>
+              <button
+                onClick={closeModal}
+                className="inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm">
+                No
+              </button>
             </div>
-          </Menu.Items>
-        </Transition>
-      </Menu>
-    </li>
+          </div>
+        </Modal>
+    </div>
   )
 }
 
