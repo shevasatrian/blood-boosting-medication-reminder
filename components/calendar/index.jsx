@@ -16,7 +16,6 @@ import {
   startOfToday,
 } from 'date-fns'
 import { Fragment, useState, useEffect } from 'react'
-import { useQueries } from '../../hooks/useQueries'
 import { useMutation } from '../../hooks/useMutation'
 import Cookies from "js-cookie";
 import { useToast } from "@chakra-ui/react";
@@ -41,7 +40,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
   const [eventAddedMap, setEventAddedMap] = useState({});
   const [lastId, setLastId] = useState(0);
   const [monthlyCount, setMonthlyCount] = useState(0);
-  const [isModalOpen, setIsModalOpen] = useState(false);  // State untuk modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [dayToCancel, setDayToCancel] = useState(null);
 
   const toast = useToast();
@@ -89,14 +88,14 @@ export default function Calendar({ onConsumptionsUpdate }) {
     setCurrentMonth(format(firstDayNextMonth, 'MMM-yyyy'))
   }
 
-  let selectedDayMeetings = meetings.filter((meeting) =>
-    isSameDay(parseISO(meeting.startDatetime), selectedDay)
-  )
+  // let selectedDayMeetings = meetings.filter((meeting) =>
+  //   isSameDay(parseISO(meeting.startDatetime), selectedDay)
+  // )
 
   async function addDefaultEvent(selectedDay) {
     const selectedDateKey = format(selectedDay, 'yyyy-MM-dd');
     if (eventAddedMap[selectedDateKey]) {
-      console.log("Date already marked.");
+      // console.log("Date already marked.");
       toast({
         title: "Gagal Menandai",
         description: "Tanggal tersebut sudah ditandai",
@@ -108,7 +107,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
       return;
     }
     if (monthlyCount >= 10) {
-      console.log("Maximum of 10 events per month reached.");
+      // console.log("Maximum of 10 events per month reached.");
       toast({
         title: "Gagal Menandai",
         description: "Sudah mencapai jumlah maksimum bulanan",
@@ -161,7 +160,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
         }));
       }
       router.reload();
-      console.log("Response:", response);
+      // console.log("Response:", response);
     } catch (error) {
       console.error("Error:", error);
     }

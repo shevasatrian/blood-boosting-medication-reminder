@@ -10,7 +10,6 @@ import { NextResponse } from 'next/server'
  
 // This function can be marked `async` if using `await` inside
 export function middleware(request) {
-  console.log("Middleware executed");
   const { pathname } = request.nextUrl
   const isCookiesExist = !!request.cookies.get("user_token")
   const isLoginPage = pathname.startsWith('/login')

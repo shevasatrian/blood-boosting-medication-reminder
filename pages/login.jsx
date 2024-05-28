@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import { useMutation } from "../hooks/useMutation";
-import Reminder from "./reminder";
 
 export default function Login() {
   const router = useRouter();
@@ -21,7 +20,7 @@ export default function Login() {
 
   const HandleSubmit = async () => {
     const response = await mutate({ url: "https://blood-sup.fly.dev/login", payload });
-    console.log(response)
+    // console.log(response)
     if (!response?.token) {
       toast({
         title: "Login Gagal",
@@ -31,8 +30,8 @@ export default function Login() {
         isClosable: true,
         position: "top",
       });
-      console.log("tidak dapat login")
-      console.log(response.user)
+      // console.log("tidak dapat login")
+      // console.log(response.user)
     } 
     else {
       // const responseData = response.data;
@@ -58,6 +57,7 @@ export default function Login() {
               objectFit="cover"
               alt="Login Image" 
               className="lg:rounded-l-2xl lg:rounded-tr-none rounded-t-2xl" 
+              priority 
             />
           </div>
 
@@ -65,15 +65,16 @@ export default function Login() {
           <div className="w-full lg:w-[55%] relative overflow-hidden hidden md:block">
             <Image 
               src='/login-fig.jpg' 
-              layout="fill" 
+              fill
               objectFit="cover"
               alt="Login Image" 
               className="lg:rounded-l-2xl lg:rounded-tr-none rounded-t-2xl" 
+              priority 
             />
           </div>
 
           <div className=" lg:px-12 lg:py-14 p-6 lg:w-[45%] w-full lg:my-4 ">
-            <h4 className="text-2xl font-bold mb-4">Blood Supplement Reminder Login</h4>
+            <h4 className="text-2xl font-bold mb-4">Notebook Planner Login</h4>
             <div className="mb-4">
               <label htmlFor="email">Email</label>
               <input

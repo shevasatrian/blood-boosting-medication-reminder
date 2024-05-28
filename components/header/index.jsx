@@ -33,7 +33,7 @@ export default function Header() {
     <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${scrolled ? 'backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="text-xl font-bold text-slate-800">
-          <Image src="/icon.png" width={50} height={50} />
+          <Image src="/icon.png" alt='icon' width={50} height={50} />
         </div>
         <div className="flex items-center">
           <Link href='/reminder' >

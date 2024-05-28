@@ -11,7 +11,7 @@ import { useState, useEffect  } from 'react'
 // const inter = Inter({ subsets: ['latin'] })
 const LayoutComponent = dynamic(() => import("../../layout"))
 
-export default function Reminder({ children }) {
+export default function Reminder() {
     const router = useRouter();
     const [tabletsCount, setTabletsCount] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -73,7 +73,7 @@ export default function Reminder({ children }) {
                 </button>
                 </div>
                 <div className="mt-auto">
-                  <Image src="/home-fig.png" width={260} height={260} />
+                  <Image src="/home-fig.png" width={260} height={260} priority />
                 </div>
               </div>
 

@@ -1,16 +1,11 @@
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-// import { Inter } from 'next/font/google'
-import Calendar from '../components/calendar'
-import PieChart from '../components/pieChart'
-import Header from '../components/header/indes'
-import { useQueries } from '../hooks/useQueries'
-import Cookies from "js-cookie";
+import Header from '../components/header'
 
 // const inter = Inter({ subsets: ['latin'] })
 const LayoutComponent = dynamic(() => import("../layout"))
 
-export default function Main({ children }) {
+export default function Main() {
 
   const materiTTD = [
     {
@@ -66,12 +61,6 @@ export default function Main({ children }) {
     },
   ]
 
-  const { data } = useQueries({
-    prefixUrl: "https://blood-sup.fly.dev/users",
-    headers: {
-      Authorization: `Bearer ${Cookies.get("user_token")}`,
-    }
-  });
 
   return (
     <>
@@ -88,6 +77,7 @@ export default function Main({ children }) {
                     layout='fill'
                     objectFit='cover'
                     className='rounded-xl'
+                    priority 
                   />
                 </div>
                 <h1 className='text-2xl md:text-4xl pt-4 font-bold mt-4'>APA ITU TABLET TAMBAH DARAH (TTD)?</h1>
@@ -109,6 +99,7 @@ export default function Main({ children }) {
                     layout='responsive'
                     width={600}
                     height={400}
+                    priority 
                   />
                 </div>
               </div>
@@ -133,6 +124,7 @@ export default function Main({ children }) {
                         alt={materi.alt}
                         width={40}
                         height={40}
+                        priority
                       />
                     </div>
                   </div>
@@ -154,9 +146,10 @@ export default function Main({ children }) {
                   <Image
                     src="/efek-sm.png"
                     alt="Manfaat TTD"
-                    layout='responsive'
+                    layout="responsive"
                     width={800}
                     height={600}
+                    priority 
                   />
                 </div>
                 {/* layout md - lg */}
@@ -168,9 +161,10 @@ export default function Main({ children }) {
                         <Image
                           src={efek.imageSrc}
                           alt={efek.alt}
-                          layout='fill'
+                          fill
                           objectFit='cover'
                           className='rounded-full'
+                          priority 
                         />
                       </div>
                     </div>
@@ -189,11 +183,12 @@ export default function Main({ children }) {
             <div className='flex justify-center items-center'>
               <Image
                 src="/footer.png"
-                alt="Manfaat TTD"
+                alt="manfaat ttd"
                 width={150}
                 height={80}
+                priority 
               />
-              <p className='text-white pt-2 pl-2'>CA-PAN (Catat dan Pantau)</p>
+              <p className='text-white pt-2 pl-2'>Notebook Planner's</p>
             </div>
           </div>
         </div>

@@ -5,7 +5,6 @@
   import Cookies from "js-cookie";
   import { useRouter } from "next/router";
   import Link from "next/link";
-  import Image from "next/image";
   import { useMutation } from "../hooks/useMutation";
   
   export default function Register() {
