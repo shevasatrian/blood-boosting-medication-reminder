@@ -15,7 +15,7 @@ import {
   parseISO,
   startOfToday,
 } from 'date-fns'
-import { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation } from '../../hooks/useMutation'
 import Cookies from "js-cookie";
 import { useToast } from "@chakra-ui/react";
@@ -50,10 +50,6 @@ export default function Calendar({ onConsumptionsUpdate }) {
     end: endOfMonth(firstDayCurrentMonth),
   })
 
-  useEffect(() => {
-    fetchData();
-  }, [currentMonth]);
-
   const fetchData = async () => {
     const year = format(firstDayCurrentMonth, 'yyyy');
     const month = format(firstDayCurrentMonth, 'MM');
@@ -77,6 +73,10 @@ export default function Calendar({ onConsumptionsUpdate }) {
       onConsumptionsUpdate(data.consumptions.length);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [currentMonth]);
 
   function previousMonth() {
     let firstDayNextMonth = add(firstDayCurrentMonth, { months: -1 })
@@ -166,7 +166,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
     }
   }
 
-  async function handleCancel(selectedDay) {
+  async function handleCancel() {
     if (!dayToCancel) return;
     const selectedDateKey = format(dayToCancel, 'yyyy-MM-dd');
     const eventId = eventAddedMap[selectedDateKey];
