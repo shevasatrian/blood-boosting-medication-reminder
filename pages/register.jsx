@@ -2,7 +2,6 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
   import {useToast} from "@chakra-ui/react";
   import { useState } from "react";
-  import Cookies from "js-cookie";
   import { useRouter } from "next/router";
   import Link from "next/link";
   import { useMutation } from "../hooks/useMutation";

@@ -177,8 +177,6 @@ export default function Main() {
             </div>
           </div>
 
-          {/* lanjutkan disini */}
-
           <div className='bg-red-900 pt-4 w-full text-center'>
             <div className='flex justify-center items-center'>
               <Image
@@ -188,7 +186,7 @@ export default function Main() {
                 height={80}
                 priority 
               />
-              <p className='text-white pt-2 pl-2'>Notebook Planner's</p>
+              <p className='text-white pt-2 pl-2'>Notebook Planner&apos;s</p>
             </div>
           </div>
         </div>

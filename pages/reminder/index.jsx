@@ -73,7 +73,7 @@ export default function Reminder() {
                 </button>
                 </div>
                 <div className="mt-auto">
-                  <Image src="/home-fig.png" width={260} height={260} priority />
+                  <Image src="/home-fig.png" width={260} height={260} alt="home" priority />
                 </div>
               </div>
 
