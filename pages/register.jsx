@@ -90,7 +90,7 @@
     return (
       <div className="flex items-center justify-center h-screen bg-gray-200">
         <div className="bg-white p-8 rounded-2xl shadow-md w-96">
-          <h4 className="text-2xl font-bold mb-4 text-center">Blood Supplement Reminder Register</h4>
+          <h4 className="text-2xl font-bold mb-4 text-center">Notebook Planner Register</h4>
           <div className="mb-4">
             <label htmlFor="email">Name</label>
             <input
