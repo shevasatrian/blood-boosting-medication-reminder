@@ -72,7 +72,7 @@ export default function Main() {
               <div className='flex flex-col items-center text-center text-white'>
                 <div className='relative w-72 h-72 md:w-[28rem] md:h-[26rem]'>
                   <Image
-                    src="/hero-fig.png"
+                    src='/hero-fig.png'
                     alt="Tablet Tambah Darah"
                     layout='fill'
                     objectFit='cover'
