@@ -14,7 +14,7 @@ export default function Main() {
       alt: 'Materi ttd 1'
     },
     {
-      text: 'Konsumsi TTD secara rutin 1 tablet tiap minggu. Jika sedang menstruasi konsumsi 1 tablet TTD setiap hari',
+      text: 'Konsumsi TTD secara rutin 1 tablet tiap minggu',
       imageSrc: '/ttd-2.png',
       alt: 'Materi ttd 2'
     },
