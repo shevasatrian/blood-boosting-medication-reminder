@@ -17,7 +17,7 @@ export default function Reminder() {
     const [isLoading, setIsLoading] = useState(true);
 
     const { data } = useQueries({
-        prefixUrl: "https://blood-sup.fly.dev/users",
+        prefixUrl: "https://grumpy-opossum-personal-be-9ca56bc7.koyeb.app/users",
         headers: {
           Authorization: `Bearer ${Cookies.get("user_token")}`,
         }

@@ -53,7 +53,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
   const fetchData = async () => {
     const year = format(firstDayCurrentMonth, 'yyyy');
     const month = format(firstDayCurrentMonth, 'MM');
-    const response = await fetch(`https://blood-sup.fly.dev/getdrugconsumption?month=${month}&year=${year}`, {
+    const response = await fetch(`https://grumpy-opossum-personal-be-9ca56bc7.koyeb.app/getdrugconsumption?month=${month}&year=${year}`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${Cookies.get("user_token")}`,
@@ -146,7 +146,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
 
     try {
       const response = await mutate({
-        url: 'https://blood-sup.fly.dev/drugconsumption',
+        url: 'https://grumpy-opossum-personal-be-9ca56bc7.koyeb.app/drugconsumption',
         payload: newPayload,
         headers: {
           Authorization: `Bearer ${Cookies.get("user_token")}`,
@@ -177,7 +177,7 @@ export default function Calendar({ onConsumptionsUpdate }) {
     }
 
     try {
-      const response = await fetch(`https://blood-sup.fly.dev/deleteconsumption/${eventId}`, {
+      const response = await fetch(`https://grumpy-opossum-personal-be-9ca56bc7.koyeb.app/deleteconsumption/${eventId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${Cookies.get("user_token")}`,
