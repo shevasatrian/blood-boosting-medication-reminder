@@ -84,8 +84,8 @@ export default function Reminder() {
               <div className='w-full px-4 lg:w-1/4 my-auto'>
                 <div className='border rounded-2xl py-4 px-4 lg:px-2 bg-rose-50 border-rose-400'>
                   <h2 className='font-bold text-3xl text-center pb-3'>Riwayat Konsumsi</h2>
-                  <p className='font-medium text-lg pl-2'>{tabletsCount}/10 Tablet</p>
-                  <PieChart consumedCount={tabletsCount} maxCount={10} />
+                  <p className='font-medium text-lg pl-2'>{tabletsCount}/4 Tablet</p>
+                  <PieChart consumedCount={tabletsCount} maxCount={4} />
                 </div>
               </div>
 
